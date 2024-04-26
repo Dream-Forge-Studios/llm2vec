@@ -54,6 +54,9 @@ from peft import LoraConfig, get_peft_model
 
 from llm2vec.models import MistralBiForMNTP, LlamaBiForMNTP
 
+import json
+import pandas as pd
+from datasets import Dataset
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 # check_min_version("4.38.0.dev0")
 
@@ -551,6 +554,13 @@ def main():
     #
     # In distributed training, the load_dataset function guarantee that only one local process can concurrently
     # download the dataset.
+    # if data_args.dataset_name == 'local_json':
+    #     with open('compensation_data.json', 'r', encoding='utf-8') as file:
+    #         data = json.load(file)
+    #
+    #         df = pd.DataFrame(data)
+    #         raw_datasets = Dataset.from_pandas(df)
+    # elif data_args.dataset_name is not None:
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
         raw_datasets = load_dataset(
