@@ -99,7 +99,7 @@ class LlamaBiModel(LlamaModel):
         # Initialize weights and apply final processing
         self.post_init()
 
-    def _update_causal_mask(self, attention_mask, input_tensor, cache_position):
+    def _update_causal_mask(self, attention_mask, input_tensor, cache_position, past_seen_tokens):
         if self.config._attn_implementation == "flash_attention_2":
             if attention_mask is not None and 0.0 in attention_mask:
                 return attention_mask
