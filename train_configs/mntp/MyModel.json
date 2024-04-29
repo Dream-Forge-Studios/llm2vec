@@ -20,5 +20,5 @@
     "gradient_checkpointing": true,
     "torch_dtype": "bfloat16",
     "attn_implementation": "flash_attention_2",
-    "cache_dir": "/data/llm/",
+    "cache_dir": "/data/llm/"
 }
