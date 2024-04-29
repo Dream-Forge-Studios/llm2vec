@@ -54,6 +54,7 @@ from peft import LoraConfig, get_peft_model
 
 from llm2vec.models import MistralBiForMNTP, LlamaBiForMNTP
 
+from bs4 import BeautifulSoup
 import json
 import pandas as pd
 from datasets import Dataset
@@ -686,7 +687,19 @@ def main():
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-
+    # lengths = []
+    # for item in raw_datasets['train']:
+    #     # 예를 들어 텍스트 데이터가 'text' 칼럼에 있다고 가정
+    #     text = item['text']
+    #     soup = BeautifulSoup(text, 'lxml-xml')
+    #     # 텍스트 토큰화
+    #     encoded_input = tokenizer(text)
+    #     # 토큰화된 결과의 길이 출력
+    #     if len(encoded_input) > 32768:
+    #         print(f"Length of '{soup.find('판례정보일련번호').text}': {len(encoded_input['input_ids'])}")
+    #     lengths.append(len(encoded_input['input_ids']))
+    # average_length = sum(lengths) / len(lengths)
+    # print(average_length)
     # Loading bidirectional model using LLM2Vec package
     model_class = get_model_class(config)
     torch_dtype = (
