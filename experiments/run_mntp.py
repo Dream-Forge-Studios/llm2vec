@@ -45,7 +45,6 @@ from transformers import (
     TrainerCallback,
     is_torch_tpu_available,
     set_seed,
-    BitsAndBytesConfig
 )
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import send_example_telemetry
@@ -708,12 +707,6 @@ def main():
         if model_args.torch_dtype in ["auto", None]
         else getattr(torch, model_args.torch_dtype)
     )
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit= True,
-        bnb_4bit_quant_type= "nf4",
-        bnb_4bit_compute_dtype= torch.bfloat16,
-        bnb_4bit_use_double_quant= False,
-    )
     model = model_class.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -725,7 +718,6 @@ def main():
         torch_dtype=torch_dtype,
         low_cpu_mem_usage=model_args.low_cpu_mem_usage,
         attn_implementation=model_args.attn_implementation,
-        quantization_config=bnb_config,
     )
     model = initialize_peft(
         model,
