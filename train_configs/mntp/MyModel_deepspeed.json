@@ -6,7 +6,7 @@
     "gradient_accumulation_steps": 4,
     "do_train": true,
     "do_eval": true,
-    "max_seq_length": 16768,
+    "max_seq_length": 512,
     "mask_token_type": "blank",
     "data_collator_type": "all_mask",
     "mlm_probability": 0.8,
