@@ -50,7 +50,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
 
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 from llm2vec.models import MistralBiForMNTP, LlamaBiForMNTP
 
@@ -480,8 +480,8 @@ def main():
             custom_args,
         ) = parser.parse_args_into_dataclasses()
 
-    if training_args.gradient_checkpointing:
-        training_args.gradient_checkpointing_kwargs = {"use_reentrant": False}
+    # if training_args.gradient_checkpointing:
+    #     training_args.gradient_checkpointing_kwargs = {"use_reentrant": False}
 
     if model_args.use_auth_token is not None:
         warnings.warn(
@@ -712,6 +712,9 @@ def main():
         attn_implementation=model_args.attn_implementation,
         device_map={"": accelerator.local_process_index}
     )
+    model.gradient_checkpointing_enable()
+    model = prepare_model_for_kbit_training(model)
+
     model = initialize_peft(
         model,
         lora_r=custom_args.lora_r,
