@@ -120,6 +120,7 @@ def initialize_peft(
     print(f"Model's Lora trainable parameters:")
     peft_model.print_trainable_parameters()
     model.set_model_for_peft(peft_model)
+    model.add_adapter(config)
     return model
 
 
