@@ -452,7 +452,7 @@ class MNTPTrainer(Trainer):
         logger.info(f"Saving model checkpoint to {output_dir}")
 
         # model organization is MODEL_TYPEBiForMNTP.model -> MODEL_TYPELBiModel, we have to save the inner model, handled by save_peft_model function of the outer model
-        self.model.save_peft_model(output_dir)
+        self.model.module.save_peft_model(output_dir)
         self.tokenizer.save_pretrained(output_dir)
 
         # Good practice: save your training arguments together with the trained model
