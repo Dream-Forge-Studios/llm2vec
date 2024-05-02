@@ -120,7 +120,6 @@ def initialize_peft(
     print(f"Model's Lora trainable parameters:")
     peft_model.print_trainable_parameters()
     model.set_model_for_peft(peft_model)
-    model.add_adapter(config)
     return model
 
 
@@ -625,6 +624,8 @@ def main():
                 cache_dir=model_args.cache_dir,
                 token=model_args.token,
             )
+    raw_datasets['train'] = raw_datasets['train'].select(range(5))
+    raw_datasets['validation'] = raw_datasets['validation'].select(range(1))
 
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
     # https://huggingface.co/docs/datasets/loading_datasets.
