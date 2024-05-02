@@ -45,12 +45,13 @@ from transformers import (
     TrainerCallback,
     is_torch_tpu_available,
     set_seed,
+    BitsAndBytesConfig
 )
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
 
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 from llm2vec.models import MistralBiForMNTP, LlamaBiForMNTP
 
@@ -104,7 +105,7 @@ def initialize_peft(
     elif lora_modules is None:
         raise ValueError("lora_modules must be specified for this model.")
 
-    config = LoraConfig(
+    peft_config = LoraConfig(
         r=lora_r,
         lora_alpha=lora_alpha,
         target_modules=lora_modules,
@@ -113,10 +114,11 @@ def initialize_peft(
         task_type=None,
     )
     # model organization is MODEL_TYPEBiForMNTP.model -> MODEL_TYPELBiModel, we have to apply PEFT to the inner model
-    peft_model = get_peft_model(model.get_model_for_peft(), config)
+    peft_model = get_peft_model(model.get_model_for_peft(), peft_config)
     print(f"Model's Lora trainable parameters:")
     peft_model.print_trainable_parameters()
     model.set_model_for_peft(peft_model)
+    model.add_adapter(peft_config)
     return model
 
 
@@ -695,7 +697,7 @@ def main():
     #     # 텍스트 토큰화
     #     encoded_input = tokenizer(text)
     #     # 토큰화된 결과의 길이 출력
-    #     if len(encoded_input) > 32768:
+    #     if len(encoded_input['input_ids']) > 10000:
     #         print(f"Length of '{soup.find('판례정보일련번호').text}': {len(encoded_input['input_ids'])}")
     #     lengths.append(len(encoded_input['input_ids']))
     # average_length = sum(lengths) / len(lengths)
@@ -706,6 +708,12 @@ def main():
         model_args.torch_dtype
         if model_args.torch_dtype in ["auto", None]
         else getattr(torch, model_args.torch_dtype)
+    )
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16
     )
     model = model_class.from_pretrained(
         model_args.model_name_or_path,
@@ -718,7 +726,10 @@ def main():
         torch_dtype=torch_dtype,
         low_cpu_mem_usage=model_args.low_cpu_mem_usage,
         attn_implementation=model_args.attn_implementation,
+        quantization_config=bnb_config,
+        device_map='auto'
     )
+    # model = prepare_model_for_kbit_training(model)
     model = initialize_peft(
         model,
         lora_r=custom_args.lora_r,
