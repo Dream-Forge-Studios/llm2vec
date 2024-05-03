@@ -1004,6 +1004,6 @@ def main():
     if training_args.push_to_hub:
         trainer.push_to_hub(**kwargs)
 
-
+    print('finish')
 if __name__ == "__main__":
     main()
