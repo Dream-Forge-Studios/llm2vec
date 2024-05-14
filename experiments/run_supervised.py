@@ -418,8 +418,6 @@ def main():
         )
     ]
 
-    accelerator = Accelerator()
-
     torch_dtype = (
         model_args.torch_dtype
         if model_args.torch_dtype in ["auto", None]
@@ -437,8 +435,6 @@ def main():
         device_map={"": accelerator.local_process_index}
     )
 
-    model = prepare_model_for_kbit_training(model)
-
     # model organization is LLM2VecModel.model -> HF Model, we have to apply PEFT to the inner model
     model.model = initialize_peft(
         model.model,
@@ -452,8 +448,6 @@ def main():
     train_loss = load_loss(custom_args.loss_class, scale=custom_args.loss_scale)
 
     data_collator = DefaultCollator(model)
-
-    model, tokenizer = accelerator.prepare(model, tokenizer)
 
     trainer = LLM2VecSupervisedTrainer(
         model=model,
