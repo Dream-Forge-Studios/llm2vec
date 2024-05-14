@@ -331,9 +331,7 @@ class LLM2VecSupervisedTrainer(Trainer):
         os.makedirs(output_dir, exist_ok=True)
         logger.info(f"Saving model checkpoint to {output_dir}")
 
-        # self.model.save(output_dir)
-        self.model.module.save_peft_model(output_dir)
-        self.tokenizer.save_pretrained(output_dir)
+        self.model.save(output_dir)
 
         # Good practice: save your training arguments together with the trained model
         torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
