@@ -11,6 +11,7 @@ class kor_nli(Dataset):
         split: str = "validation",
         file_path: str = "kor_nli",
         cache_dir: str = "/data/llm/",
+        # cache_dir: str = "D:\\huggingface\\cache",
     ):
         self.dataset_name = dataset_name
         self.split = split
