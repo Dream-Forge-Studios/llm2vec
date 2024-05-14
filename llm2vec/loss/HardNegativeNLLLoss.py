@@ -36,7 +36,9 @@ class HardNegativeNLLLoss():
             full_d_reps_neg = d_reps_neg
 
         d_reps = torch.cat([full_d_reps_pos, full_d_reps_neg], dim=0)
-        scores = self.similarity_fct(full_q_reps, d_reps) * self.scale
+        # scores = self.similarity_fct(full_q_reps, d_reps) * self.scale
+        max_score = 1
+        scores = (max_score - self.similarity_fct(full_q_reps, d_reps)) * self.scale
         labels = (
             torch.tensor(
                 range(len(scores)), dtype=torch.long, device=scores.device

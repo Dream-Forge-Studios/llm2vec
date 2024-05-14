@@ -27,7 +27,7 @@ class kor_nli(Dataset):
         raw_datasets = load_dataset(file_path, "xnli", cache_dir=cache_dir)
         id_ = 0
         for dataset in raw_datasets['validation']:
-            if dataset['label'] == 0:
+            if dataset['label'] == 2:
                 self.data.append(
                     DataSample(
                         id_=id_,
@@ -37,16 +37,16 @@ class kor_nli(Dataset):
                 )
                 id_ += 1
 
-        for dataset in raw_datasets['test']:
-            if dataset['label'] == 0:
-                self.data.append(
-                    DataSample(
-                        id_=id_,
-                        query=dataset['premise'],
-                        positive=dataset['hypothesis'],
-                    )
-                )
-                id_ += 1
+        # for dataset in raw_datasets['test']:
+        #     if dataset['label'] == 0:
+        #         self.data.append(
+        #             DataSample(
+        #                 id_=id_,
+        #                 query=dataset['premise'],
+        #                 positive=dataset['hypothesis'],
+        #             )
+        #         )
+        #         id_ += 1
 
         logger.info(f"Loaded {len(self.data)} samples.")
 
