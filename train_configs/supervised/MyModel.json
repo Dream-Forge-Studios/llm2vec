@@ -16,7 +16,7 @@
     "disable_tqdm": false,
     "max_seq_length": 512,
     "overwrite_output_dir": true,
-    "output_dir": "/data/mlm/EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-supervised",
+    "output_dir": "/data/mlm/EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-negative-supervised",
     "logging_steps": 50,
     "save_steps": 200,
     "save_only_model": true,
