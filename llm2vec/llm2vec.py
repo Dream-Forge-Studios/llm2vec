@@ -53,21 +53,28 @@ class LLM2Vec(nn.Module):
         self.skip_instruction = skip_instruction
         self.max_length = max_length
         self.doc_max_length = doc_max_length
+        self.config = model.config
 
     @classmethod
-    def _get_model_class(cls, config_class_name):
+    def _get_model_class(cls, config_class_name, enable_bidirectional):
+        if not enable_bidirectional:
+            return AutoModel
         if config_class_name == "MistralConfig":
             return MistralBiModel
         elif config_class_name == "LlamaConfig":
             return LlamaBiModel
         else:
-            raise ValueError(f"{config_class_name} is not supported yet.")
+            raise ValueError(
+                f"{config_class_name} is not supported yet with bidirectional models."
+            )
 
     @classmethod
     def from_pretrained(
         cls,
         base_model_name_or_path,
         peft_model_name_or_path=None,
+        merge_peft=False,
+        enable_bidirectional=True,
         **kwargs,
     ):
         # pop out encoder args
@@ -83,7 +90,9 @@ class LLM2Vec(nn.Module):
         config = AutoConfig.from_pretrained(base_model_name_or_path)
         config_class_name = config.__class__.__name__
 
-        model_class = cls._get_model_class(config_class_name)
+        model_class = cls._get_model_class(
+            config_class_name, enable_bidirectional=enable_bidirectional
+        )
         model = model_class.from_pretrained(base_model_name_or_path, **kwargs)
 
         # For special case where config.json and adapter weights are in the same directory
@@ -99,6 +108,8 @@ class LLM2Vec(nn.Module):
                 model,
                 peft_model_name_or_path,
             )
+            if merge_peft:
+                model = model.merge_and_unload()
 
         config = {}
         config_addr = (
@@ -117,20 +128,26 @@ class LLM2Vec(nn.Module):
         return cls(model=model, tokenizer=tokenizer, **config)
 
     def prepare_for_tokenization(self, text):
-        def _is_instruct(name):
-            return (
-                ("chat" in name.lower())
-                or ("instruct" in name.lower())
-                or ("sharegpt" in name.lower())
+        if self.model.config._name_or_path == "meta-llama/Meta-Llama-3-8B-Instruct":
+            text = (
+                "<|start_header_id|>user<|end_header_id|>\n\n"
+                + text.strip()
+                + "<|eot_id|>"
             )
-
-        if _is_instruct(self.model.config._name_or_path):
+            return text
+        if self.model.config._name_or_path in [
+            "mistralai/Mistral-7B-Instruct-v0.2",
+            "meta-llama/Llama-2-7b-chat-hf",
+        ]:
             text = "[INST] " + text.strip() + " [/INST]"
-        if (
-            isinstance(self.model.config, LlamaConfig)
-            or isinstance(self.model.config, MistralConfig)
-        ) and self.pooling_mode == "eos_token":
-            text = text.strip() + " </s>"
+        if self.pooling_mode == "eos_token":
+            if self.model.config._name_or_path == "meta-llama/Meta-Llama-3-8B":
+                text = text.strip() + "<|end_of_text|>"
+            elif isinstance(self.model.config, LlamaConfig) or isinstance(
+                self.model.config, MistralConfig
+            ):
+                text = text.strip() + " </s>"
+
         return text
 
     def tokenize(self, texts):
@@ -260,12 +277,31 @@ class LLM2Vec(nn.Module):
         show_progress_bar: bool = True,
         convert_to_numpy: bool = False,
         convert_to_tensor: bool = False,
+        device: Optional[str] = None,
     ):
+        """
+        Encode a list of sentences to their respective embeddings. The sentences can be a list of strings or a string.
+        Args:
+            sentences: sentence or sentences to encode.
+            batch_size: batch size for turning sentence tokens into embeddings.
+            show_progress_bar: whether to show progress bars during encoding steps.
+            convert_to_numpy: If true, return numpy arrays instead of torch tensors.
+            convert_to_tensor: If true, return torch tensors (default).
+            device: torch backend device identifier (e.g., 'cuda', 'cpu','mps' etc.). If not specified,
+            the default is to use cuda when available, otherwise cpu. Note that only the choice of 'cuda' supports
+            multiprocessing as currently implemented.
+
+        Returns: embeddings of the sentences.
+
+        """
         if isinstance(sentences[0], str) and isinstance(sentences[-1], int):
             sentences = [sentences]
         # required for MEDI version of MTEB
         if isinstance(sentences[0], str):
             sentences = [[""] + [sentence] for sentence in sentences]
+
+        if device is None:
+                device = "cuda" if torch.cuda.is_available() else "cpu"
 
         concatenated_input_texts = []
         for sentence in sentences:
@@ -286,7 +322,7 @@ class LLM2Vec(nn.Module):
         all_embeddings = []
 
         if torch.cuda.device_count() <= 1:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            # This branch also support mps devices
             self.to(device)
             for start_index in trange(
                 0,
@@ -303,6 +339,7 @@ class LLM2Vec(nn.Module):
                 )
                 all_embeddings.append(embeddings)
         else:
+
             num_proc = torch.cuda.device_count()
             cuda_compatible_multiprocess = mp.get_context("spawn")
             with cuda_compatible_multiprocess.Pool(num_proc) as p:
@@ -313,6 +350,8 @@ class LLM2Vec(nn.Module):
                 for result in p.map(
                     partial(
                         self._encode,
+                        # This branch only supports CUDA devices, so we ignore the value of device
+                        # and let _encode determine it based on rank.
                         device=None,
                         convert_to_numpy=convert_to_numpy,
                         multiprocessing=True,
@@ -350,8 +389,10 @@ class LLM2Vec(nn.Module):
             with open(f"{output_path}/llm2vec_config.json", "w") as fOut:
                 json.dump(llm2vec_config, fOut, indent=4)
 
-    def _encode(self, sentences_batch, device, convert_to_numpy, multiprocessing=False):
+    def _encode(self, sentences_batch, device:Optional[str]=None, convert_to_numpy:bool=False, multiprocessing=False):
         if multiprocessing:
+            # multiprocessing only supports CUDA devices at this time, so we ignore the value of device
+            # and use cuda:rank for the device
             rank = mp.current_process()._identity[0]
             if device is None and torch.cuda.is_available():
                 device = f"cuda:{rank % torch.cuda.device_count()}"
@@ -395,4 +436,9 @@ class LLM2Vec(nn.Module):
     ) -> nn.Embedding:
         return self.model.resize_token_embeddings(
             new_num_tokens=new_num_tokens, pad_to_multiple_of=pad_to_multiple_of
+        )
+
+    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
+        self.model.gradient_checkpointing_enable(
+            gradient_checkpointing_kwargs=gradient_checkpointing_kwargs
         )

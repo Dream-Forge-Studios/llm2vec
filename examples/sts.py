@@ -6,11 +6,12 @@ from scipy.stats import spearmanr
 import torch
 from llm2vec import LLM2Vec
 
+cache_dir = "D:\\huggingface\\cache"
 
 dataset = "mteb/sts17-crosslingual-sts"
 instruction = "Retrieve semantically similar text: "
 
-dataset = datasets.load_dataset(dataset, "en-en")
+dataset = datasets.load_dataset(dataset, "ko-ko", cache_dir=cache_dir)
 
 min_score, max_score = 0, 5
 normalize = lambda x: (x - min_score) / (max_score - min_score)
@@ -21,10 +22,11 @@ sentences1, sentences2 = dataset["test"]["sentence1"], dataset["test"]["sentence
 
 print("Loading model...")
 model = LLM2Vec.from_pretrained(
-    "McGill-NLP/LLM2Vec-Mistral-7B-Instruct-v2-mntp",
-    peft_model_name_or_path="McGill-NLP/LLM2Vec-Mistral-7B-Instruct-v2-mntp-supervised",
+    "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
+    peft_model_name_or_path="D:\\mlm\\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp",
     device_map="cuda" if torch.cuda.is_available() else "cpu",
     torch_dtype=torch.bfloat16,
+    cache_dir=cache_dir
 )
 
 def append_instruction(instruction, sentences):
