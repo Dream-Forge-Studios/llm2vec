@@ -37,6 +37,17 @@ class kor_nli(Dataset):
                 )
                 id_ += 1
 
+        for dataset in raw_datasets['c']:
+            if dataset['label'] == 0:
+                self.data.append(
+                    DataSample(
+                        id_=id_,
+                        query=dataset['premise'],
+                        positive=dataset['hypothesis'],
+                    )
+                )
+                id_ += 1
+
         logger.info(f"Loaded {len(self.data)} samples.")
 
     def __getitem__(self, index):
