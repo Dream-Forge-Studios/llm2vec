@@ -37,7 +37,7 @@ class kor_nli(Dataset):
                 )
                 id_ += 1
 
-        for dataset in raw_datasets['c']:
+        for dataset in raw_datasets['test']:
             if dataset['label'] == 0:
                 self.data.append(
                     DataSample(

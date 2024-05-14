@@ -461,6 +461,8 @@ def main():
 
     trainer.train()
 
+    print('end')
+
 
 if __name__ == "__main__":
     main()
