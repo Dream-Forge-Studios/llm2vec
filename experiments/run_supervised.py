@@ -24,7 +24,7 @@ from transformers import (
 )
 from transformers.trainer_utils import seed_worker
 
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 from llm2vec import LLM2Vec
 from llm2vec.dataset.utils import load_dataset
@@ -331,7 +331,9 @@ class LLM2VecSupervisedTrainer(Trainer):
         os.makedirs(output_dir, exist_ok=True)
         logger.info(f"Saving model checkpoint to {output_dir}")
 
-        self.model.save(output_dir)
+        # self.model.save(output_dir)
+        self.model.module.save_peft_model(output_dir)
+        self.tokenizer.save_pretrained(output_dir)
 
         # Good practice: save your training arguments together with the trained model
         torch.save(self.args, os.path.join(output_dir, "training_args.bin"))
@@ -410,8 +412,7 @@ def main():
     train_examples = [
         train_dataset[i]
         for i in tqdm(
-            # range(len(train_dataset)),
-            range(10),
+            range(len(train_dataset)),
             desc="Loading train examples...",
             disable=not accelerator.is_main_process,
         )
@@ -436,6 +437,8 @@ def main():
         device_map={"": accelerator.local_process_index}
     )
 
+    model = prepare_model_for_kbit_training(model)
+
     # model organization is LLM2VecModel.model -> HF Model, we have to apply PEFT to the inner model
     model.model = initialize_peft(
         model.model,
@@ -450,7 +453,7 @@ def main():
 
     data_collator = DefaultCollator(model)
 
-    model, tokenizer, train_examples = accelerator.prepare(model, tokenizer, train_examples)
+    model, tokenizer = accelerator.prepare(model, tokenizer)
 
     trainer = LLM2VecSupervisedTrainer(
         model=model,
