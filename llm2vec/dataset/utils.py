@@ -1,4 +1,4 @@
-from ..dataset import E5Data, kor_nli
+from ..dataset import E5Data, kor_nli, Wiki1M, wikipedia_ko_for_simcse
 
 
 def load_dataset(dataset_name, split="validation", file_path=None, **kwargs):
@@ -13,6 +13,8 @@ def load_dataset(dataset_name, split="validation", file_path=None, **kwargs):
     dataset_mapping = {
         "E5": E5Data,
         "kor_nli": kor_nli,
+        "Wiki1M": Wiki1M,
+        "wikipedia_ko_for_simcse": wikipedia_ko_for_simcse,
     }
 
     if dataset_name not in dataset_mapping:
