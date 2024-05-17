@@ -4,7 +4,7 @@
     "bidirectional": true,
     "pooling_mode": "mean",
     "dataset_name": "kor_nli_simcse",
-    "dataset_file_path": "kor_nli_simcse",
+    "dataset_file_path": "dkoterwa/kor_nli_simcse",
     "remove_unused_columns": false,
     "learning_rate": 2e-4,
     "num_train_epochs": 3,
