@@ -4,12 +4,12 @@ from datasets import load_dataset
 
 logger = get_logger(__name__, log_level="INFO")
 
-class wikipedia_ko_for_simcse(Dataset):
+class kor_nli(Dataset):
     def __init__(
         self,
-        dataset_name: str = "wikipedia_ko_for_simcse",
+        dataset_name: str = "kor_nli",
         split: str = "validation",
-        file_path: str = "wikimedia/wikipedia",
+        file_path: str = "kor_nli",
         cache_dir: str = "/data/llm/",
         # cache_dir: str = "D:\\huggingface\\cache",
     ):
@@ -22,23 +22,32 @@ class wikipedia_ko_for_simcse(Dataset):
         return len(self.data)
 
     def load_data(self, file_path: str = None, cache_dir: str = None):
-        logger.info(f"Loading wikipedia ko data...")
+        logger.info(f"Loading kor_nli data...")
 
-        raw_datasets = load_dataset(file_path, "20231101.ko", cache_dir=cache_dir)
+        raw_datasets = load_dataset(file_path, "xnli", cache_dir=cache_dir)
         id_ = 0
-        for dataset in raw_datasets['train']:
-            for text in dataset['text'].split('.'):
-                text = text.strip() + '.'
+        for dataset in raw_datasets['validation']:
+            if dataset['label'] == 2:
                 self.data.append(
                     DataSample(
                         id_=id_,
-                        query=text,
-                        positive=text,
+                        query=dataset['premise'],
+                        positive=dataset['premise'],
+                        negative=dataset['hypothesis'],
                     )
                 )
                 id_ += 1
-            if len(self.data) > 10000:
-                break
+
+        # for dataset in raw_datasets['test']:
+        #     if dataset['label'] == 0:
+        #         self.data.append(
+        #             DataSample(
+        #                 id_=id_,
+        #                 query=dataset['premise'],
+        #                 positive=dataset['hypothesis'],
+        #             )
+        #         )
+        #         id_ += 1
 
         logger.info(f"Loaded {len(self.data)} samples.")
 
@@ -49,4 +58,4 @@ class wikipedia_ko_for_simcse(Dataset):
                 texts=[sample.query, sample.positive], label=1.0
             )
         elif self.split == "validation":
-            assert False, "wikipedia ko does not have a validation split."
+            assert False, "Wiki1M does not have a validation split."

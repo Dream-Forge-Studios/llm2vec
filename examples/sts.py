@@ -18,34 +18,35 @@ dataset = datasets.load_dataset(dataset, "ko-ko")
 
 min_score, max_score = 0, 5
 normalize = lambda x: (x - min_score) / (max_score - min_score)
-normalized_scores = list(map(normalize, dataset["test"]["score"]))
+normalized_scores = list(map(normalize, dataset["test"]["score"][:10]))
 batch_size = 8
+batch_size = 2
 
-sentences1, sentences2 = dataset["test"]["sentence1"], dataset["test"]["sentence2"]
+sentences1, sentences2 = dataset["test"]["sentence1"][:10], dataset["test"]["sentence2"][:10]
 
 print("Loading model...")
-# model = LLM2Vec.from_pretrained(
-#     "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
-#     peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-simcse\checkpoint-1000",
-#     device_map="cuda" if torch.cuda.is_available() else "cpu",
-#     torch_dtype=torch.bfloat16,
-#     cache_dir=cache_dir
-# )
-#
-# def append_instruction(instruction, sentences):
-#     new_sentences = []
-#     for s in sentences:
-#         new_sentences.append([instruction, s, 0])
-#     return new_sentences
-#
-# print(f"Encoding {len(sentences1)} sentences1...")
-# instruction_sentences1 = append_instruction(instruction, sentences1)
-# embeddings1 = np.asarray(model.encode(instruction_sentences1, batch_size=batch_size))
-#
-# print(f"Encoding {len(sentences2)} sentences2...")
-# instruction_sentences2 = append_instruction(instruction, sentences2)
-# embeddings2 = np.asarray(model.encode(instruction_sentences2, batch_size=batch_size))
-#
+model = LLM2Vec.from_pretrained(
+    "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
+    peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp\checkpoint-1000",
+    device_map="cuda" if torch.cuda.is_available() else "cpu",
+    torch_dtype=torch.bfloat16,
+    cache_dir=cache_dir
+)
+
+def append_instruction(instruction, sentences):
+    new_sentences = []
+    for s in sentences:
+        new_sentences.append([instruction, s, 0])
+    return new_sentences
+
+print(f"Encoding {len(sentences1)} sentences1...")
+instruction_sentences1 = append_instruction(instruction, sentences1)
+embeddings1 = np.asarray(model.encode(instruction_sentences1, batch_size=batch_size))
+
+print(f"Encoding {len(sentences2)} sentences2...")
+instruction_sentences2 = append_instruction(instruction, sentences2)
+embeddings2 = np.asarray(model.encode(instruction_sentences2, batch_size=batch_size))
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -77,13 +78,15 @@ embeddings22, _ = model(**inputs2, return_dict=False)
 robert_embeddings2 = robertMeanPooling(inputs2['attention_mask'], embeddings22)
 
 print("Evaluating...")
-# cosine_scores = 1 - (paired_cosine_distances(embeddings1, embeddings2))
-cosine_scores = 1 - (paired_cosine_distances(robert_embeddings1.detach().cpu().numpy(), robert_embeddings2.detach().cpu().numpy()))
+cosine_scores = 1 - (paired_cosine_distances(embeddings1, embeddings2))
+cosine_scoresRo = 1 - (paired_cosine_distances(robert_embeddings1.detach().cpu().numpy(), robert_embeddings2.detach().cpu().numpy()))
 cosine_spearman, _ = spearmanr(normalized_scores, cosine_scores)
+cosine_spearmanRo, _ = spearmanr(normalized_scores, cosine_scoresRo)
 
 results = {
     "cos_sim": {
         "spearman": cosine_spearman,
+        "spearmanRo": cosine_spearmanRo,
     }
 }
 
