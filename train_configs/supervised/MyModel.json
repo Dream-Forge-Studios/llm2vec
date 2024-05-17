@@ -6,7 +6,7 @@
     "dataset_name": "kor_nli_simcse",
     "dataset_file_path": "dkoterwa/kor_nli_simcse",
     "remove_unused_columns": false,
-    "learning_rate": 2e-5,
+    "learning_rate": 3e-5,
     "num_train_epochs": 3,
     "warmup_steps": 300,
     "per_device_train_batch_size": 1,

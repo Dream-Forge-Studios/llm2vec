@@ -410,8 +410,7 @@ def main():
     train_examples = [
         train_dataset[i]
         for i in tqdm(
-            # range(len(train_dataset)),
-            range(10),
+            range(len(train_dataset)),
             desc="Loading train examples...",
             disable=not accelerator.is_main_process,
         )
