@@ -10,9 +10,9 @@ from llm2vec import LLM2Vec
 
 instruction = "Retrieve semantically similar text: "
 sentences1 = """
-감자국
+나는 너무 많이 먹어서 배 불르다.
 """
-sentences2 = "강원도"
+sentences2 = "나는 아이가 생겨 배가 부르고 있다."
 
 print("Loading model...")
 model = LLM2Vec.from_pretrained(
@@ -20,7 +20,7 @@ model = LLM2Vec.from_pretrained(
     peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp\checkpoint-1000",
     device_map="cuda" if torch.cuda.is_available() else "cpu",
     torch_dtype=torch.bfloat16,
-    cache_dir="D:\\huggingface\\cache"
+    cache_dir="D:\\huggingface\\cache",
 )
 
 embeddings1 = model.encode([instruction, sentences1, 0], batch_size=1)

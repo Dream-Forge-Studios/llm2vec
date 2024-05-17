@@ -4,12 +4,12 @@ from datasets import load_dataset
 
 logger = get_logger(__name__, log_level="INFO")
 
-class kor_nli_for_simcse(Dataset):
+class kor_nli_simcse(Dataset):
     def __init__(
         self,
-        dataset_name: str = "kor_nli",
+        dataset_name: str = "kor_nli_simcse",
         split: str = "validation",
-        file_path: str = "kor_nli",
+        file_path: str = "dkoterwa/kor_nli_simcse",
         cache_dir: str = "/data/llm/",
         # cache_dir: str = "D:\\huggingface\\cache",
     ):
@@ -22,32 +22,20 @@ class kor_nli_for_simcse(Dataset):
         return len(self.data)
 
     def load_data(self, file_path: str = None, cache_dir: str = None):
-        logger.info(f"Loading kor_nli data...")
+        logger.info(f"Loading kor_nli_simcse data...")
 
-        raw_datasets = load_dataset(file_path, "xnli", cache_dir=cache_dir)
+        raw_datasets = load_dataset(file_path, "train", cache_dir=cache_dir)
         id_ = 0
-        for dataset in raw_datasets['validation']:
-            if dataset['label'] == 2:
-                self.data.append(
+        for dataset in raw_datasets:
+            self.data.append(
                     DataSample(
                         id_=id_,
                         query=dataset['premise'],
-                        positive=dataset['premise'],
-                        negative=dataset['hypothesis'],
+                        positive=dataset['entailment'],
+                        negative=dataset['contradiction'],
                     )
                 )
-                id_ += 1
-
-        # for dataset in raw_datasets['test']:
-        #     if dataset['label'] == 0:
-        #         self.data.append(
-        #             DataSample(
-        #                 id_=id_,
-        #                 query=dataset['premise'],
-        #                 positive=dataset['hypothesis'],
-        #             )
-        #         )
-        #         id_ += 1
+            id_ += 1
 
         logger.info(f"Loaded {len(self.data)} samples.")
 
