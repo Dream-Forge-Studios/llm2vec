@@ -1,7 +1,7 @@
 import torch
 from torch import nn, Tensor
 from .loss_utils import cos_sim, mismatched_sizes_all_gather
-
+import torch.nn.functional as F
 class HardNegativeNLLLoss():
     def __init__(
         self,
@@ -20,7 +20,7 @@ class HardNegativeNLLLoss():
     ):
         if d_reps_neg is None:
             d_reps_neg = d_reps_pos[:0, :]
-        
+
         if torch.distributed.is_initialized():
             full_d_reps_pos = mismatched_sizes_all_gather(d_reps_pos)
             full_d_reps_pos = torch.cat(full_d_reps_pos)
@@ -35,13 +35,16 @@ class HardNegativeNLLLoss():
             full_q_reps = q_reps
             full_d_reps_neg = d_reps_neg
 
-        d_reps = torch.cat([full_d_reps_pos, full_d_reps_neg], dim=0)
-        scores = self.similarity_fct(full_q_reps, d_reps) * self.scale
-        labels = (
-            torch.tensor(
-                range(len(scores)), dtype=torch.long, device=scores.device
-            )
-        )
-
-        loss = self.cross_entropy_loss(scores, labels)
+        # d_reps = torch.cat([full_d_reps_pos, full_d_reps_neg], dim=0)
+        # scores = self.similarity_fct(full_q_reps, d_reps) * self.scale
+        # labels = (
+        #     torch.tensor(
+        #         range(len(scores)), dtype=torch.long, device=scores.device
+        #     )
+        # )
+        #
+        # loss = self.cross_entropy_loss(scores, labels)
+        pos_scores = self.similarity_fct(full_q_reps, full_d_reps_pos)
+        neg_scores = self.similarity_fct(full_q_reps, full_d_reps_neg)
+        loss = F.relu(neg_scores - pos_scores + self.margin + 0.5).mean()
         return loss
