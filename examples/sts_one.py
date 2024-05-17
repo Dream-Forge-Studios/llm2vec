@@ -10,9 +10,9 @@ from llm2vec import LLM2Vec
 
 instruction = "Retrieve semantically similar text: "
 sentences1 = """
-나는 임신을 했다.
+나는 너무 많이 먹어서 배가 나왔어
 """
-sentences2 = "나는 아이가 생겨 배가 부르고 있다."
+sentences2 = "나는 임심을 해서 배가 나왔어"
 
 print("Loading model...")
 model = LLM2Vec.from_pretrained(
