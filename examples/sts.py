@@ -13,7 +13,8 @@ cache_dir = "D:\\huggingface\\cache"
 dataset = "mteb/sts17-crosslingual-sts"
 instruction = "Retrieve semantically similar text: "
 
-dataset = datasets.load_dataset(dataset, "ko-ko", cache_dir=cache_dir)
+# dataset = datasets.load_dataset(dataset, "ko-ko", cache_dir=cache_dir)
+dataset = datasets.load_dataset(dataset, "ko-ko")
 
 min_score, max_score = 0, 5
 normalize = lambda x: (x - min_score) / (max_score - min_score)
