@@ -10,14 +10,14 @@ from llm2vec import LLM2Vec
 
 instruction = "Retrieve semantically similar text: "
 sentences1 = """
-나는 너무 많이 먹어서 배 불르다.
+나는 임신을 했다.
 """
 sentences2 = "나는 아이가 생겨 배가 부르고 있다."
 
 print("Loading model...")
 model = LLM2Vec.from_pretrained(
     "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
-    peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp\checkpoint-1000",
+    peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-supervisedSimcse\checkpoint-200",
     device_map="cuda" if torch.cuda.is_available() else "cpu",
     torch_dtype=torch.bfloat16,
     cache_dir="D:\\huggingface\\cache",

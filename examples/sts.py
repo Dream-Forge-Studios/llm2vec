@@ -27,7 +27,7 @@ sentences1, sentences2 = dataset["test"]["sentence1"][:10], dataset["test"]["sen
 print("Loading model...")
 model = LLM2Vec.from_pretrained(
     "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
-    peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp\checkpoint-1000",
+    peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-supervisedSimcse\checkpoint-200",
     device_map="cuda" if torch.cuda.is_available() else "cpu",
     torch_dtype=torch.bfloat16,
     cache_dir=cache_dir

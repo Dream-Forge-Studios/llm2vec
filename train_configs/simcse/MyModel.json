@@ -7,7 +7,7 @@
     "dataset_name": "kor_nli_for_simcse",
     "dataset_file_path": "kor_nli",
     "remove_unused_columns": false,
-    "learning_rate": 1.5e-5,
+    "learning_rate": 3e-6,
     "loss_scale": 20,
     "per_device_train_batch_size": 1,
     "per_device_eval_batch_size": 1,
