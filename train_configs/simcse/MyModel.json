@@ -4,7 +4,7 @@
     "simcse_dropout": 0.3,
     "bidirectional": true,
     "pooling_mode": "mean",
-    "dataset_name": "kor_nli_for_simcse.py",
+    "dataset_name": "kor_nli_for_simcse",
     "dataset_file_path": "kor_nli",
     "remove_unused_columns": false,
     "learning_rate": 3e-5,

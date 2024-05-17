@@ -10,9 +10,9 @@ from llm2vec import LLM2Vec
 
 instruction = "Retrieve semantically similar text: "
 sentences1 = """
-가나다라
+감자국
 """
-sentences2 = "공작물 점유자의 책임을 묻는 사건에서 신탁회사와 집합투자업자의 공동 점유 확인"
+sentences2 = "강원도"
 
 print("Loading model...")
 model = LLM2Vec.from_pretrained(
