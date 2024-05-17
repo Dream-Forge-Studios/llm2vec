@@ -55,7 +55,7 @@ class kor_nli_for_negative_unsupervised_simcse(Dataset):
         sample = self.data[index]
         if self.split == "train":
             return TrainSample(
-                texts=[sample.query, sample.positive], label=1.0
+                texts=[sample.query, sample.positive, sample.negative], label=1.0
             )
         elif self.split == "validation":
             assert False, "Wiki1M does not have a validation split."

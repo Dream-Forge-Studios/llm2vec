@@ -410,7 +410,8 @@ def main():
     train_examples = [
         train_dataset[i]
         for i in tqdm(
-            range(len(train_dataset)),
+            # range(len(train_dataset)),
+            range(10),
             desc="Loading train examples...",
             disable=not accelerator.is_main_process,
         )
@@ -430,7 +431,8 @@ def main():
         max_length=model_args.max_seq_length,
         torch_dtype=torch_dtype,
         attn_implementation=model_args.attn_implementation,
-        device_map={"": accelerator.local_process_index}
+        device_map={"": accelerator.local_process_index},
+        cache_dir="D:\\huggingface\\cache",
     )
 
     # model organization is LLM2VecModel.model -> HF Model, we have to apply PEFT to the inner model
