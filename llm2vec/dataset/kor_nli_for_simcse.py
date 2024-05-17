@@ -4,7 +4,7 @@ from datasets import load_dataset
 
 logger = get_logger(__name__, log_level="INFO")
 
-class kor_nli(Dataset):
+class kor_nli_for_simcse(Dataset):
     def __init__(
         self,
         dataset_name: str = "kor_nli",
