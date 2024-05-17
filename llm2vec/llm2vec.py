@@ -138,6 +138,7 @@ class LLM2Vec(nn.Module):
         if self.model.config._name_or_path in [
             "mistralai/Mistral-7B-Instruct-v0.2",
             "meta-llama/Llama-2-7b-chat-hf",
+            "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
         ]:
             text = "[INST] " + text.strip() + " [/INST]"
         if self.pooling_mode == "eos_token":
