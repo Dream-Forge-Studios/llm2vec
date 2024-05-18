@@ -351,7 +351,6 @@ def main():
         torch_dtype=torch_dtype,
         attn_implementation=model_args.attn_implementation,
         attention_dropout=custom_args.simcse_dropout,
-        device_map={"": accelerator.local_process_index}
     )
 
     # model organization is LLM2VecModel.model -> HF Model, we have to apply PEFT to the inner model
