@@ -24,9 +24,9 @@ class kor_nli_for_negative_unsupervised_simcse(Dataset):
     def load_data(self, file_path: str = None, cache_dir: str = None):
         logger.info(f"Loading kor_nli data...")
 
-        raw_datasets = load_dataset(file_path, "xnli", cache_dir=cache_dir)
+        raw_datasets = load_dataset(file_path, "snli", cache_dir=cache_dir)
         id_ = 0
-        for dataset in raw_datasets['validation']:
+        for dataset in raw_datasets['train']:
             if dataset['label'] == 2:
                 self.data.append(
                     DataSample(

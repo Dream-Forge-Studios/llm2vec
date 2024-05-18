@@ -24,7 +24,7 @@ class kor_nli_simcse(Dataset):
     def load_data(self, file_path: str = None, cache_dir: str = None):
         logger.info(f"Loading kor_nli_simcse data...")
 
-        raw_datasets = load_dataset(file_path, "default", cache_dir=cache_dir)
+        raw_datasets = load_dataset(file_path, "xnli", cache_dir=cache_dir)
         id_ = 0
         for dataset in raw_datasets['train']:
             self.data.append(
