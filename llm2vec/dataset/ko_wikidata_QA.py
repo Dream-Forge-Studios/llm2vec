@@ -13,13 +13,11 @@ class ko_wikidata_QA(Dataset):
         file_path: str = "maywell/ko_wikidata_QA",
         cache_dir: str = "/data/llm/",
         # cache_dir: str = "D:\\huggingface\\cache",
-        separator: str = "!@#$%^&*()",
     ):
         self.dataset_name = dataset_name
         self.split = split
         self.data = []
         self.load_data(file_path, cache_dir)
-        self.separator = separator
 
     def __len__(self):
         return len(self.data)
@@ -43,7 +41,7 @@ class ko_wikidata_QA(Dataset):
             self.data.append(
                     DataSample(
                         id_=id_,
-                        query='Given a question query, retrieve relevant documents that answer the query.' + self.separator + dataset['instruction'],
+                        query='Given a question query, retrieve relevant documents that answer the query.; !@#$%^&*()' + dataset['instruction'],
                         positive=dataset['output'],
                     )
                 )
