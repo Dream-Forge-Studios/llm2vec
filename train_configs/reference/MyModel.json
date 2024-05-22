@@ -4,7 +4,7 @@
     "bidirectional": true,
     "pooling_mode": "mean",
     "dataset_name": "KorSTS",
-    "dataset_file_path": "D:/KorSTS/sts-train.tsv",
+    "dataset_file_path": "data/KorSTS/sts-train.tsv",
     "remove_unused_columns": false,
     "learning_rate": 2e-4,
     "num_train_epochs": 3,
