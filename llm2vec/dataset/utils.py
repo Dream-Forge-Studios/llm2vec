@@ -1,4 +1,4 @@
-from ..dataset import E5Data, kor_nli, Wiki1M, wikipedia_ko_for_simcse, kor_nli_for_negative_unsupervised_simcse, kor_nli_simcse, ko_wikidata_QA
+from ..dataset import E5Data, kor_nli, Wiki1M, wikipedia_ko_for_simcse, kor_nli_for_negative_unsupervised_simcse, kor_nli_simcse, ko_wikidata_QA, KorSTS
 
 
 def load_dataset(dataset_name, split="validation", file_path=None, **kwargs):
@@ -18,6 +18,7 @@ def load_dataset(dataset_name, split="validation", file_path=None, **kwargs):
         "kor_nli_for_negative_unsupervised_simcse": kor_nli_for_negative_unsupervised_simcse,
         "kor_nli_simcse": kor_nli_simcse,
         "ko_wikidata_QA": ko_wikidata_QA,
+        "KorSTS": KorSTS,
     }
 
     if dataset_name not in dataset_mapping:

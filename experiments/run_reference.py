@@ -269,12 +269,10 @@ class LLM2VecSupervisedTrainer(Trainer):
         self,
         *args,
         loss_function=None,
-        reference_model=None,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.loss_function = loss_function
-        self.reference_model = reference_model
 
     def compute_loss(
         self,
@@ -287,9 +285,9 @@ class LLM2VecSupervisedTrainer(Trainer):
         d_reps = self.model(features[1])
         d_reps_neg = self.model(features[2])
 
-        reference_q_reps = self.reference_model(features[0])
-        reference_d_reps = self.reference_model(features[1])
-        reference_d_reps_neg = self.reference_model(features[2])
+        reference_q_reps = 0
+        reference_d_reps = 0
+        reference_d_reps_neg = 0
         loss = self.loss_function(q_reps, d_reps, d_reps_neg, reference_q_reps, reference_d_reps, reference_d_reps_neg)
 
         if return_outputs:
@@ -451,19 +449,6 @@ def main():
 
     data_collator = DefaultCollator(model)
 
-    reference_model = LLM2Vec.from_pretrained(
-        base_model_name_or_path="yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
-        enable_bidirectional=model_args.bidirectional,
-        peft_model_name_or_path="/data/mlm/EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-supervisedSimcse/checkpoint-1000",
-        merge_peft=True,
-        pooling_mode=model_args.pooling_mode,
-        max_length=model_args.max_seq_length,
-        torch_dtype=torch_dtype,
-        attn_implementation=model_args.attn_implementation,
-        device_map={"": accelerator.local_process_index},
-        cache_dir="D:\\huggingface\\cache",
-    )
-
     trainer = LLM2VecSupervisedTrainer(
         model=model,
         args=training_args,
@@ -471,7 +456,6 @@ def main():
         data_collator=data_collator,
         tokenizer=tokenizer,
         loss_function=train_loss,
-        reference_model=reference_model
     )
 
     if custom_args.stop_after_n_steps is not None:
