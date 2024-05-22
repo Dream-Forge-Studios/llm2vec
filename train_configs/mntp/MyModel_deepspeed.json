@@ -1,5 +1,5 @@
 {
-    "model_name_or_path": "maywell/Synatra-7B-v0.3-dpo",
+    "model_name_or_path": "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
     "dataset_name": "maywell/korean_textbooks",
     "dataset_config_name": "tiny-textbooks",
     "per_device_train_batch_size": 1,
@@ -12,7 +12,7 @@
     "data_collator_type": "all_mask",
     "mlm_probability": 0.8,
     "overwrite_output_dir": true,
-    "output_dir": "/data/mlm/Synatra-7B-v0.3-dpo-RoBERTa-mntp",
+    "output_dir": "/data/mlm/EEVE-Korean-Instruct-10.8B-RoBERTa-mntp",
     "evaluation_strategy": "steps",
     "eval_steps": 100,
     "save_steps": 500,

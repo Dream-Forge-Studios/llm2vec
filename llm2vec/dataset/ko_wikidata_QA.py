@@ -11,8 +11,8 @@ class ko_wikidata_QA(Dataset):
         dataset_name: str = "ko_wikidata_QA",
         split: str = "validation",
         file_path: str = "maywell/ko_wikidata_QA",
-        cache_dir: str = "/data/llm/",
-        # cache_dir: str = "D:\\huggingface\\cache",
+        # cache_dir: str = "/data/llm/",
+        cache_dir: str = "D:\\huggingface\\cache",
     ):
         self.dataset_name = dataset_name
         self.split = split
