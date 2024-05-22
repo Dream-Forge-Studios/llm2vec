@@ -213,9 +213,9 @@ class CustomArguments:
     )
 
     loss_class: Optional[str] = field(
-        default="HardNegativeNLLLoss",
+        default="DPOLoss",
         metadata={
-            "help": "The loss class to use for training. Options: HardNegativeNLLLoss"
+            "help": "The loss class to use for training. Options: DPOLoss"
         },
     )
 
