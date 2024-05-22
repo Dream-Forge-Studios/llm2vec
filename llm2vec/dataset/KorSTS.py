@@ -30,7 +30,7 @@ class KorSTS(Dataset):
             next(f)
             for line in f:
                 temps = line.strip().split('\t')
-                scaled_value = scale_value(temps[4], 0, 5, -1, 1)
+                scaled_value = scale_value(float(temps[4]), 0, 5, -1, 1)
                 self.data.append(
                     DataSample(
                         id_=id_,
