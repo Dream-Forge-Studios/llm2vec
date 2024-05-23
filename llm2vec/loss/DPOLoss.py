@@ -40,9 +40,5 @@ class DPOLoss():
 
         # RLHF 손실 함수 계산
         # 정책 로그 확률 계산
-        log_ratios = F.logsigmoid(policy_scores - full_reference_score_tensor)
-
-        # 보상 신호 기반 손실 계산
-        rewards = self.beta * log_ratios
-        loss = -torch.mean(rewards)
+        loss = -F.logsigmoid(policy_scores - full_reference_score_tensor).mean()
         return loss
