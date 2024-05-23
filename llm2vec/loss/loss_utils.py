@@ -1,5 +1,6 @@
 import torch
 from torch import Tensor
+import torch.nn.functional as F
 
 class AllGather(torch.autograd.Function):
     """
@@ -73,3 +74,31 @@ def mismatched_sizes_all_gather(tensor: Tensor, group=None, async_op=False, mism
             "This would remove non-padding information"
         tensor_list[rank] = tensor_list[rank].narrow(mismatched_axis, 0, sizes[rank])
     return tensor_list
+
+def cos_sim_single_pairs(a: Tensor, b: Tensor):
+    """
+    Computes the cosine similarity cos_sim(a[i], b[i]) for each i.
+    :return: Tensor with res[i] = cos_sim(a[i], b[i])
+    """
+    if not isinstance(a, torch.Tensor):
+        a = torch.tensor(a)
+
+    if not isinstance(b, torch.Tensor):
+        b = torch.tensor(b)
+
+    if len(a.shape) == 1:
+        a = a.unsqueeze(0)
+
+    if len(b.shape) == 1:
+        b = b.unsqueeze(0)
+
+    # Ensure a and b have the same size
+    assert a.shape == b.shape, "The shapes of a and b must match."
+
+    a_norm = F.normalize(a, p=2, dim=1)
+    b_norm = F.normalize(b, p=2, dim=1)
+
+    # Element-wise multiplication and summation to get individual cosine similarities
+    cos_sim_values = torch.sum(a_norm * b_norm, dim=1)
+
+    return cos_sim_values

@@ -1,14 +1,12 @@
 import torch
 from torch import nn, Tensor
-from .loss_utils import cos_sim, mismatched_sizes_all_gather
-import torch.nn.functional as F
-from sklearn.metrics.pairwise import paired_cosine_distances
+from .loss_utils import cos_sim_single_pairs, mismatched_sizes_all_gather
 
 class DPOLoss():
     def __init__(
         self,
         beta: float = 0.1,
-        similarity_fct = cos_sim,
+        similarity_fct = cos_sim_single_pairs,
     ):
         self.beta = beta
         self.similarity_fct = similarity_fct
