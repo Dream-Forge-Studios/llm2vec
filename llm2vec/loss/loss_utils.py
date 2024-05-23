@@ -101,4 +101,6 @@ def cos_sim_single_pairs(a: Tensor, b: Tensor):
     # Element-wise multiplication and summation to get individual cosine similarities
     cos_sim_values = torch.sum(a_norm * b_norm, dim=1)
 
-    return cos_sim_values
+    cos_sim_values_scaled = (cos_sim_values + 1) / 2
+
+    return cos_sim_values_scaled

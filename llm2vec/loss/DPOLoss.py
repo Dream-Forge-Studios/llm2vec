@@ -1,7 +1,7 @@
 import torch
 from torch import nn, Tensor
 from .loss_utils import cos_sim_single_pairs, mismatched_sizes_all_gather
-
+import torch.nn.functional as F
 class DPOLoss():
     def __init__(
         self,
@@ -40,8 +40,7 @@ class DPOLoss():
 
         # RLHF 손실 함수 계산
         # 정책 로그 확률 계산
-        ratios = policy_scores / full_reference_score_tensor
-        log_ratios = torch.log(ratios + 1e-8)
+        log_ratios = F.logsigmoid(policy_scores - full_reference_score_tensor)
 
         # 보상 신호 기반 손실 계산
         rewards = self.beta * log_ratios
