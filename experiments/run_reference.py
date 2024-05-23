@@ -429,7 +429,8 @@ def main():
         torch_dtype=torch_dtype,
         attn_implementation=model_args.attn_implementation,
         device_map={"": accelerator.local_process_index},
-        cache_dir="D:\\huggingface\\cache",
+        # cache_dir="D:\\huggingface\\cache",
+        cache_dir = "/data/llm/"
     )
 
     # model organization is LLM2VecModel.model -> HF Model, we have to apply PEFT to the inner model
