@@ -73,3 +73,45 @@ def mismatched_sizes_all_gather(tensor: Tensor, group=None, async_op=False, mism
             "This would remove non-padding information"
         tensor_list[rank] = tensor_list[rank].narrow(mismatched_axis, 0, sizes[rank])
     return tensor_list
+
+
+def all_gather_with_grad_test(tensor_list, tensor, group=None, async_op=False):
+    # Implementing a simple version of all_gather_with_grad
+    torch.distributed.all_gather(tensor_list, tensor, group=group, async_op=async_op)
+
+
+def mismatched_sizes_all_gather_test(tensor: Tensor, group=None, async_op=False, mismatched_axis=0):
+    # Ensure tensor is on GPU
+    tensor = tensor.cuda() if tensor.device != torch.device('cuda') else tensor
+
+    assert torch.distributed.is_initialized(), "torch.distributed not initialized"
+    world_size = torch.distributed.get_world_size()
+
+    # let's get the sizes for everyone
+    mismatched_sizes = torch.tensor([tensor.shape[mismatched_axis]], dtype=torch.int64, device="cuda")
+    sizes = [torch.zeros_like(mismatched_sizes) for _ in range(world_size)]
+    torch.distributed.all_gather(sizes, mismatched_sizes, group=group, async_op=async_op)
+    sizes = torch.cat(sizes).cpu().tolist()
+
+    # now pad to the max dim-0 size
+    max_size = max(sizes)
+    padded = torch.zeros((*tensor.shape[:mismatched_axis], max_size, *tensor.shape[mismatched_axis + 1:]),
+                         device=tensor.device, dtype=tensor.dtype)
+
+    # selects the place where we're adding information
+    padded_to_fill = padded.narrow(mismatched_axis, 0, tensor.shape[mismatched_axis])
+    padded_to_fill[...] = tensor
+
+    # gather the padded tensors
+    tensor_list = [torch.zeros(padded.shape, device=padded.device, dtype=padded.dtype) for _ in range(world_size)]
+    all_gather_with_grad_test(tensor_list, padded, group, async_op)
+
+    # trim off the padding
+    for rank in range(world_size):
+        # checks that the rest is 0
+        assert not tensor_list[rank].narrow(mismatched_axis, sizes[rank],
+                                            padded.shape[mismatched_axis] - sizes[rank]).count_nonzero().is_nonzero(), \
+            "This would remove non-padding information"
+        tensor_list[rank] = tensor_list[rank].narrow(mismatched_axis, 0, sizes[rank])
+
+    return tensor_list

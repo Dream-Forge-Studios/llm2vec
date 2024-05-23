@@ -1,6 +1,6 @@
 import torch
 from torch import nn, Tensor
-from .loss_utils import cos_sim, mismatched_sizes_all_gather
+from .loss_utils import cos_sim, mismatched_sizes_all_gather, mismatched_sizes_all_gather_test
 import torch.nn.functional as F
 from sklearn.metrics.pairwise import paired_cosine_distances
 
@@ -27,7 +27,8 @@ class DPOLoss():
             full_q_reps = mismatched_sizes_all_gather(q_reps)
             full_q_reps = torch.cat(full_q_reps)
 
-            full_d_reps_reps = mismatched_sizes_all_gather(d_reps_neg)
+            d_reps_neg = d_reps_neg.cuda() if d_reps_neg.device != torch.device('cuda') else d_reps_neg
+            full_d_reps_reps = mismatched_sizes_all_gather_test(d_reps_neg)
             full_d_reps_neg = torch.cat(full_d_reps_reps)
         else:
             full_d_reps_pos = d_reps_pos
