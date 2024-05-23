@@ -8,8 +8,8 @@ class KorSTS(Dataset):
         self,
         dataset_name: str = "KorSTS",
         split: str = "validation",
-        # file_path: str = "D:/KorSTS/sts-train.tsv",
-        file_path: str = "/data/KorSTS/sts-train.tsv",
+        file_path: str = "D:/KorSTS/sts-train.tsv",
+        # file_path: str = "/data/KorSTS/sts-train.tsv",
     ):
         self.dataset_name = dataset_name
         self.split = split

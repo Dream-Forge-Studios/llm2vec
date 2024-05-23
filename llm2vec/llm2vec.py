@@ -154,44 +154,51 @@ class LLM2Vec(nn.Module):
     def tokenize(self, texts):
         texts_2 = []
         original_texts = []
+        floatChecker = False
         for text in texts:
-            t = text.split("!@#$%^&*()")
-            texts_2.append(t[1] if len(t) > 1 else "")
-            original_texts.append("".join(t))
-
-        original = self.tokenizer(
-            original_texts,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=self.max_length,
-        )
-        embed_mask = None
-        for t_i, t in enumerate(texts_2):
-            ids = self.tokenizer(
-                [t],
+            if isinstance(text, str):
+                t = text.split("!@#$%^&*()")
+                texts_2.append(t[1] if len(t) > 1 else "")
+                original_texts.append("".join(t))
+            else:
+                floatChecker = True
+                original_texts.append(text)
+        if floatChecker:
+            original = {'input_ids': original_texts}
+        else:
+            original = self.tokenizer(
+                original_texts,
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
                 max_length=self.max_length,
-                add_special_tokens=False,
             )
-            if embed_mask is None:
-                e_m = torch.zeros_like(original["attention_mask"][t_i])
-                if len(ids["input_ids"][0]) > 0:
-                    e_m[-len(ids["input_ids"][0]) :] = torch.ones(
-                        len(ids["input_ids"][0])
-                    )
-                embed_mask = e_m.unsqueeze(0)
-            else:
-                e_m = torch.zeros_like(original["attention_mask"][t_i])
-                if len(ids["input_ids"][0]) > 0:
-                    e_m[-len(ids["input_ids"][0]) :] = torch.ones(
-                        len(ids["input_ids"][0])
-                    )
-                embed_mask = torch.cat((embed_mask, e_m.unsqueeze(0)), dim=0)
+            embed_mask = None
+            for t_i, t in enumerate(texts_2):
+                ids = self.tokenizer(
+                    [t],
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=self.max_length,
+                    add_special_tokens=False,
+                )
+                if embed_mask is None:
+                    e_m = torch.zeros_like(original["attention_mask"][t_i])
+                    if len(ids["input_ids"][0]) > 0:
+                        e_m[-len(ids["input_ids"][0]) :] = torch.ones(
+                            len(ids["input_ids"][0])
+                        )
+                    embed_mask = e_m.unsqueeze(0)
+                else:
+                    e_m = torch.zeros_like(original["attention_mask"][t_i])
+                    if len(ids["input_ids"][0]) > 0:
+                        e_m[-len(ids["input_ids"][0]) :] = torch.ones(
+                            len(ids["input_ids"][0])
+                        )
+                    embed_mask = torch.cat((embed_mask, e_m.unsqueeze(0)), dim=0)
 
-        original["embed_mask"] = embed_mask
+            original["embed_mask"] = embed_mask
         return original
 
     def _skip_instruction(self, sentence_feature):
