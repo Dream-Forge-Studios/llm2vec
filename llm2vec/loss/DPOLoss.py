@@ -39,7 +39,8 @@ class DPOLoss():
         policy_scores = 1 - (paired_cosine_distances(q_reps_cpu, d_reps_pos_cpu))
 
         policy_scores_tensor = torch.tensor(policy_scores).to(q_reps.device)
-        reference_scores_tensor = full_reference_score_tensor.flatten()
+        policy_scores_tensor.requires_grad = True
+        full_reference_score_tensor = full_reference_score_tensor.flatten()
         full_reference_score_tensor.requires_grad = False
 
         # RLHF 손실 함수 계산
