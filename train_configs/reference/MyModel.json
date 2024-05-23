@@ -13,7 +13,7 @@
     "per_device_eval_batch_size": 1,
     "gradient_accumulation_steps": 4,
     "do_train": true,
-    "disable_tqdm": false,
+    "disable_tqdm": true,
     "max_seq_length": 512,
     "overwrite_output_dir": true,
     "output_dir": "/data/mlm/EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-reference-supervised",
