@@ -164,7 +164,7 @@ class LLM2Vec(nn.Module):
                 floatChecker = True
                 original_texts.append(text)
         if floatChecker:
-            original = {'input_ids': original_texts}
+            original = original_texts
         else:
             original = self.tokenizer(
                 original_texts,
