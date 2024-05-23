@@ -10,12 +10,23 @@ from transformers import AutoModel, AutoTokenizer
 
 cache_dir = "D:\\huggingface\\cache"
 
-dataset = "mteb/sts17-crosslingual-sts"
+file_path = "D:/KorSTS/sts-train.tsv"
 instruction = "Retrieve semantically similar text: "
 
-# dataset = datasets.load_dataset(dataset, "ko-ko", cache_dir=cache_dir)
-dataset = datasets.load_dataset(dataset, "ko-ko")
-
+dataset = {
+    "test": {
+        "score": [],
+        "sentence1": [],
+        "sentence2": [],
+    },
+}
+with open(file_path, "r", encoding="utf-8") as f:
+    next(f)
+    for line in f:
+        temps = line.strip().split('\t')
+        dataset["test"]["score"].append(float(temps[4]))
+        dataset["test"]["sentence1"].append(temps[5])
+        dataset["test"]["sentence2"].append(temps[6])
 min_score, max_score = 0, 5
 normalize = lambda x: (x - min_score) / (max_score - min_score)
 normalized_scores = list(map(normalize, dataset["test"]["score"]))
@@ -28,7 +39,7 @@ model = LLM2Vec.from_pretrained(
     "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
     # "maywell/Synatra-7B-v0.3-dpo",
     # "maywell/Synatra-7B-v0.3-RP",
-    peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-qa-supervised\ko_wikidata_QA_train_m-EEVE-Korean-Instruct-10.8B-v1.0_p-mean_b-12_l-512_bidirectional-True_e-3_s-42_w-300_lr-3e-05_lora_r-16\checkpoint-1000",
+    # peft_model_name_or_path="D:\mlm\EEVE-Korean-Instruct-10.8B-RoBERTa-mntp-qa-supervised\ko_wikidata_QA_train_m-EEVE-Korean-Instruct-10.8B-v1.0_p-mean_b-12_l-512_bidirectional-True_e-3_s-42_w-300_lr-3e-05_lora_r-16\checkpoint-1000",
     device_map="cuda" if torch.cuda.is_available() else "cpu",
     torch_dtype=torch.bfloat16,
     cache_dir=cache_dir

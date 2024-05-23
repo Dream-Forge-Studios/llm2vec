@@ -2,6 +2,8 @@ import torch
 from torch import nn, Tensor
 from .loss_utils import cos_sim, mismatched_sizes_all_gather
 import torch.nn.functional as F
+from sklearn.metrics.pairwise import paired_cosine_distances
+
 class DPOLoss():
     def __init__(
         self,
@@ -10,7 +12,6 @@ class DPOLoss():
     ):
         self.beta = beta
         self.similarity_fct = similarity_fct
-        self.cross_entropy_loss = nn.CrossEntropyLoss()
 
     def __call__(
         self,
@@ -32,10 +33,18 @@ class DPOLoss():
             full_q_reps = q_reps
             full_d_reps_neg = d_reps_neg
 
-        policy_scores = self.similarity_fct(full_q_reps, full_d_reps_pos)
+        q_reps_cpu = full_q_reps.cpu().to(torch.float32).detach().numpy()
+        d_reps_pos_cpu = full_d_reps_pos.cpu().to(torch.float32).detach().numpy()
+        policy_scores = 1 - (paired_cosine_distances(q_reps_cpu, d_reps_pos_cpu))
         reference_scores = full_d_reps_neg
 
-        ratios = policy_scores / reference_scores
+        # NumPy 배열을 텐서로 변환
+        policy_scores_tensor = torch.tensor(policy_scores)
+
+        # 리스트를 텐서로 변환
+        reference_scores_tensor = torch.tensor(reference_scores, dtype=torch.float32)
+
+        ratios = policy_scores_tensor / reference_scores_tensor
         log_ratios = torch.log(ratios + 1e-8)
 
         loss = -F.logsigmoid(self.beta * log_ratios)
