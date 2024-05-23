@@ -56,7 +56,8 @@ def prepare_for_tokenization(model, text, pooling_mode="mean"):
         "meta-llama/Llama-2-7b-chat-hf",
         "yanolja/EEVE-Korean-Instruct-10.8B-v1.0",
     ]:
-        text = "[INST] " + text.strip() + " [/INST]"
+        if isinstance(text, str):
+            text = "[INST] " + text.strip() + " [/INST]"
     if pooling_mode == "eos_token":
         if model.config._name_or_path == "meta-llama/Meta-Llama-3-8B":
             text = text.strip() + "<|end_of_text|>"
