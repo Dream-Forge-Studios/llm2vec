@@ -445,7 +445,7 @@ def main():
 
     tokenizer = model.tokenizer
 
-    train_loss = load_loss(custom_args.loss_class, scale=custom_args.loss_scale)
+    train_loss = load_loss(custom_args.loss_class)
 
     data_collator = DefaultCollator(model)
 
