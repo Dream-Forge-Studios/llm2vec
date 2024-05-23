@@ -284,12 +284,8 @@ class LLM2VecSupervisedTrainer(Trainer):
         features, labels = inputs
         q_reps = self.model(features[0])
         d_reps = self.model(features[1])
-        d_reps_neg = self.model(features[2])
-
-        reference_q_reps = 0
-        reference_d_reps = 0
-        reference_d_reps_neg = 0
-        loss = self.loss_function(q_reps, d_reps, d_reps_neg, reference_q_reps, reference_d_reps, reference_d_reps_neg)
+        d_reps_neg = features[2]
+        loss = self.loss_function(q_reps, d_reps, d_reps_neg)
 
         if return_outputs:
             output = torch.cat(
