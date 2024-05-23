@@ -162,7 +162,7 @@ class LLM2Vec(nn.Module):
                 original_texts.append("".join(t))
             else:
                 floatChecker = True
-                original_texts.append(text)
+                original_texts.append([text])
         if floatChecker:
             original = original_texts
         else:

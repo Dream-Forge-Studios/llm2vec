@@ -19,6 +19,7 @@ class DPOLoss():
         d_reps_pos: Tensor,
         d_reps_neg: list,
     ):
+        d_reps_neg = torch.tensor(d_reps_neg)
         if torch.distributed.is_initialized():
             full_d_reps_pos = mismatched_sizes_all_gather(d_reps_pos)
             full_d_reps_pos = torch.cat(full_d_reps_pos)
@@ -26,7 +27,8 @@ class DPOLoss():
             full_q_reps = mismatched_sizes_all_gather(q_reps)
             full_q_reps = torch.cat(full_q_reps)
 
-            full_d_reps_neg = torch.cat(d_reps_neg)
+            full_d_reps_reps = mismatched_sizes_all_gather(d_reps_neg)
+            full_d_reps_neg = torch.cat(full_d_reps_reps)
         else:
             full_d_reps_pos = d_reps_pos
             full_q_reps = q_reps
@@ -41,7 +43,7 @@ class DPOLoss():
         policy_scores_tensor = torch.tensor(policy_scores)
 
         # 리스트를 텐서로 변환
-        reference_scores_tensor = torch.tensor(reference_scores, dtype=torch.float32)
+        reference_scores_tensor = reference_scores.flatten()
 
         ratios = policy_scores_tensor / reference_scores_tensor
         log_ratios = torch.log(ratios + 1e-8)
