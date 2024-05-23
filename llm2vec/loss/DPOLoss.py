@@ -34,18 +34,15 @@ class DPOLoss():
             full_q_reps = q_reps
             full_reference_score_tensor = reference_score_tensor
 
-        q_reps_cpu = full_q_reps.cpu().to(torch.float32).detach().numpy()
-        d_reps_pos_cpu = full_d_reps_pos.cpu().to(torch.float32).detach().numpy()
-        policy_scores = 1 - (paired_cosine_distances(q_reps_cpu, d_reps_pos_cpu))
 
-        policy_scores_tensor = torch.tensor(policy_scores).to(q_reps.device)
-        policy_scores_tensor.requires_grad = True
+        policy_scores = self.similarity_fct(full_q_reps, full_d_reps_pos)
+
         full_reference_score_tensor = full_reference_score_tensor.flatten()
         full_reference_score_tensor.requires_grad = False
 
         # RLHF 손실 함수 계산
         # 정책 로그 확률 계산
-        ratios = policy_scores_tensor / full_reference_score_tensor
+        ratios = policy_scores / full_reference_score_tensor
         log_ratios = torch.log(ratios + 1e-8)
 
         # 보상 신호 기반 손실 계산
