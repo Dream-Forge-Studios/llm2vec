@@ -41,7 +41,7 @@ class DPOLoss():
         policy_scores_tensor = torch.tensor(policy_scores)
         policy_scores_tensor = policy_scores_tensor.to(q_reps.device)
 
-        reference_scores_tensor = full_d_reps_neg.flatten()
+        reference_scores_tensor = full_d_reps_neg.flatten().requires_grad_()
 
         ratios = policy_scores_tensor / reference_scores_tensor
         log_ratios = torch.log(ratios + 1e-8)
