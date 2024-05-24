@@ -40,6 +40,6 @@ class DPOLoss():
 
         # RLHF 손실 함수 계산
         # 정책 로그 확률 계산
-        loss = F.logsigmoid(policy_scores - full_reference_score_tensor).mean()
-        # loss = F.mse_loss(policy_scores, full_reference_score_tensor)
+        # loss = F.logsigmoid(policy_scores - full_reference_score_tensor).mean()
+        loss = F.mse_loss(policy_scores, full_reference_score_tensor)
         return loss
